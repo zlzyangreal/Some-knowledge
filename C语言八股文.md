@@ -36,40 +36,11 @@ int main(){
 	}
 }
 ```
-## 5. 用变量a给出下面的定义
-
-a) 一个整型数（An integer）  
-b)一个指向整型数的指针（ A pointer to an integer）  
-c)一个指向指针的的指针，它指向的指针是指向一个整型数（ A pointer to a pointer to an intege）r  
-d)一个有10个整型数的数组（ An array of 10 integers）
-e) 一个有10个指针的数组，该指针是指向一个整型数的。（An array of 10 pointers to integers）f) 一个指向有10个整型数数组的指针（ A pointer to an array of 10 integers）
-g) 一个指向函数的指针，该函数有一个整型参数并返回一个整型数（A pointer to a function that takes an integer as an argument and returns an integer）
-h) 一个有10个指针的数组，该指针指向一个函数，该函数有一个整型参数并返回一个整型数（ An array of ten pointers to functions that take an integer argument and return an integer ）
-```c
-// a
-int A_data = 0; 
-// b
-int *a; //指针 `a` 并没有被初始化，因此它是一个野指针（wild pointer），指向一个不确定的内存地址。
-// c
-int **a; //二级指针
-// d
-int A_arr[10];
-// e
-int *a[10];
-// f
-int (*a)[10];
-// g
-int (*a)(int);
-// h
-int (*a[10])(int);
-```
-- [[指针型定义]]
-- [[二级指针]]
-## 6.已知数组table，用宏求数组元素个数
+## 5.已知数组table，用宏求数组元素个数
 ```c
 #define COUNT(table) (sizeof(table) / sizeof(table[0]))
 ```
-## 7.带参宏和函数的区别？
+## 6.带参宏和函数的区别？
 - 带参宏只是在编译预处理阶段进行简单的字符替换；而函数则是在运行时进行调用和返回。
 - 宏替换不占运行时间，只占编译时间；而函数调用则占运行时间
 - 带参宏在处理时不分配内存；而函数调用会分配临时内存
@@ -85,22 +56,22 @@ int main(){
 	int num = add(2,3); //2 3 是实参
 }
 ```
-## 8.内联函数的优缺点和适用场景是什么？
+## 7.内联函数的优缺点和适用场景是什么？
 - 优点：内联函数与宏定义一样会在原地展开，省去了函数调用开销，同时又能做类型检查
 - 缺点：它会使程序的代码量增大，消耗更多内存空间
-## 9.如何用C语言实现读写寄存器变量？
+## 8.如何用C语言实现读写寄存器变量？
 ```c
 #define rBANKCON0 (*(volatile unsigned long *)0x48000004)
 rBankCON0 = 0x12;
 ```
 - 由于是寄存器地址，所以需要先将其强制类型转换为 volatile unsigned long *
-## 10.下面代码能不能编译通过？
+## 9.下面代码能不能编译通过？
 ```c
 #define c 3
 c++;
 ```
 - 不能。c宏定义是常数，++用于变量
-## 11.在C语言中，凡是以#开头的都是预处理命令，同时预处理命令都是以#开头的
+## 10.在C语言中，凡是以#开头的都是预处理命令，同时预处理命令都是以#开头的
 
 # 二、关键字
 ## 1.关键字 static 的作用是什么？
@@ -169,3 +140,141 @@ volatile在编译阶段，extern在链接阶段
 - C语言编译过程分为预处理、编译、汇编、链接
 ## 11.const与#define的异同？
 前者有数据类型，两者都可以定义常数
+# 三、数据结构
+## 1. 用变量a给出下面的定义
+
+a) 一个整型数（An integer）  
+b)一个指向整型数的指针（ A pointer to an integer）  
+c)一个指向指针的的指针，它指向的指针是指向一个整型数（ A pointer to a pointer to an intege）r  
+d)一个有10个整型数的数组（ An array of 10 integers）
+e) 一个有10个指针的数组，该指针是指向一个整型数的。（An array of 10 pointers to integers）f) 一个指向有10个整型数数组的指针（ A pointer to an array of 10 integers）
+g) 一个指向函数的指针，该函数有一个整型参数并返回一个整型数（A pointer to a function that takes an integer as an argument and returns an integer）
+h) 一个有10个指针的数组，该指针指向一个函数，该函数有一个整型参数并返回一个整型数（ An array of ten pointers to functions that take an integer argument and return an integer ）
+```c
+// a
+int A_data = 0; 
+// b
+int *a; //指针 `a` 并没有被初始化，因此它是一个野指针（wild pointer），指向一个不确定的内存地址。
+// c
+int **a; //二级指针
+// d
+int A_arr[10];
+// e
+int *a[10];
+// f
+int (*a)[10];
+// g
+int (*a)(int);
+// h
+int (*a[10])(int);
+```
+- [[指针型定义]]
+- [[二级指针]]
+## 2.下面的代码输出是什么，为什么？
+```c
+void foo(void) {
+	unsigned int a = 6;
+	int b = -20;
+	(a + b > 6)? printf("> 6") : printf(" <= 6");
+}
+```
+- 输出>6
+## 3.写出float x与“零值”比较的if语句。
+```c
+if(x>-0.01 && x<0.01);
+```
+- 浮点数不能用`==` `!=`
+## 4.下面代码有什么错误？
+```c
+#include<stdio.h>
+void main() {
+	char *s = "AAA";
+	s[0] = 'B';
+	printf("%s", s);
+}
+```
+- s是指针，直接指向了常量
+- s在常量的基础上直接赋值是不合法的
+## 5.下面代码输出是什么？
+```c
+#include<stdio.h>
+void main() {
+	int *a = (int *)2;
+	printf("%d", a + 3);
+}
+```
+- 第一步将2指针化，在指针的基础上加3，由于`int`是4字节，相当于`2+3*4`
+## 6.下面代码运行后会是什么现象？
+```c
+#include<stdio.h>
+
+#define N 500
+void main() {
+	unsigned char count;
+	for(count = 0; count < N; count++) {
+		printf("---%d---\n", count);
+	}
+}
+```
+- `unsigned char`最大为255，会一直打印从0-255
+## 7.下面函数的返回值是？
+```c
+int foo(void) {
+	int i;
+	char c = 0x80;
+	i = c;
+	if(i > 0)
+		return 1;
+	return 2;
+}
+```
+- char范围是(`-128`-`127`),`0x80`是128超了，`i=-128`返回2
+## 8.结构体内存对齐原则？
+1. 第一个成员的首地址（地址偏移量）为0
+2. **对齐单位**：每个成员变量的对齐单位通常是其类型大小的整数倍
+- `char` 类型的对齐单位是1字节
+- `int` 类型（通常是4字节）的对齐单位是4字节
+- `double` 类型（通常是8字节）的对齐单位是8字节
+3. **结构体的总大小必须是最大对齐单位的整数倍**
+```c
+#include <stdio.h>
+
+struct Example {
+    char a;        // 1字节，对齐单位为1
+    int b;         // 4字节，对齐单位为4
+    double c;      // 8字节，对齐单位为8
+};
+
+int main() {
+    printf("Size of struct Example: %zu\n", sizeof(struct Example));
+    return 0;
+}
+```
+- 输出`Size of struct Example: 16`
+## 9.结构体内存对齐的原因？
+1. 平台原因（移植原因）：不是所有的硬件平台都能访问任意地址上的任意数据
+2. 对齐的内存访问通常比非对齐访问更快
+## 10.给定结构体，它在内存中占用多少字节（32位编译器）？
+```c
+struct A {
+	char t : 4;// 4位
+	char k : 4;// 4位
+	unsigned short i : 8; // 8位
+	unsigned long m; // 4字节
+};
+```
+- **1字节（Byte）等于8位（Bit）**
+- 结构体8字节
+## 11.在32位系统中，有如下结构体，那么sizeof(fun)的数值是？
+```c
+#pragma pack(1)
+struct fun {
+	int i; // 4字节
+	double d; // 8字节
+	char c; // 1字节
+};
+```
+- `sizeof`返回字节数，`pragma pack(1)`修改对其字节数为1，返回13
+## 12.数组首元素地址和数组地址的异同？
+1. 异：数组首元素地址和数组地址是两个不同的概念。例如`int a[10]`，a的值是数组首元素地址，所以a+1就是第二个元素的地址，int类型占用4个字节，所以两者相差4。而&a是数组地址，所以&a+1就是向后移动`(10*4)`个单位，所以两者相差40。
+2. 同：数组首元素地址和数组地址的值是相等的。
