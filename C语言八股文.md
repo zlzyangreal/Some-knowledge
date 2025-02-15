@@ -425,3 +425,147 @@ c = a + b > 0 ? 1 : 2;
 3. float与double之间
 - double转float**会**丢失精度
 - float转double**不会**丢失精度
+# 四、内存管理
+## 1.由gcc编译的C语言程序占用的内存分为哪几个部分？
+
+| 栈区(stack)       | 存放函数的参数、局部变量。                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| 堆区(heap)        | 提供程序员动态申请的内存空间。                                                                           |
+| 全局（静态）区(static) | 存放全局变量和静态变量，初始化不为0的全局变量和静态变量、const型常量在一块区域（.data段），未初始化的、初始化为0的全局变量和静态变量在相邻的另一块区域（.bss段）。 |
+| 程序代码区           | 存放函数体的二进制代码和字符串常量                                                                         |
+## 2.小端和大端
+- 小端：一个数据的低位字节数据存储在低地址
+- 大端：一个数据的高位字节数据存储在低地址
+## 3.如何判读一个系统的大小端存储模式？
+**方法1：使用指针**
+通过将一个多字节的整数赋值给一个变量，并通过指针访问其最低地址的内容来判断。
+```c
+#include <stdio.h>
+
+int main() {
+    unsigned int x = 1; // 1 的二进制表示为 00000001 00000000 00000000 00000000
+    char *c = (char*)&x; // 将 x 的地址转换为字符指针
+
+    if (*c) { // 如果最低地址的内容为 1，则为小端
+        printf("Little-Endian\n");
+    } else { // 如果最低地址的内容为 0，则为大端
+        printf("Big-Endian\n");
+    }
+
+    return 0;
+}
+```
+**方法2：使用位运算**
+通过位运算和联合体（`union`）来判断大小端模式。
+```c
+#include <stdio.h>
+
+int main() {
+    union {
+        unsigned int i;
+        char c[sizeof(unsigned int)];
+    } u;
+
+    u.i = 1; // 将 1 赋值给整数部分
+
+    if (u.c[0]) { // 如果最低地址的内容为 1，则为小端
+        printf("Little-Endian\n");
+    } else { // 如果最低地址的内容为 0，则为大端
+        printf("Big-Endian\n");
+    }
+
+    return 0;
+}
+```
+## 4.全局变量和局部变量的区别？
+- 全局变量储存在静态区，进入main函数之前就被创建，生命周期为整个源程序。
+- 局部变量在栈中分配，在函数被调用时才被创建，在函数退出时销毁，生命周期为函数内。
+## 5.以下程序中，主函数能否成功申请到内存空间？
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+void getmemory(char *p) {
+	p = (char *)malloc(100);
+	strcpy(p, "hello world");
+}
+
+int main() {
+	char *str = NULL;
+	getmemory(str);
+	printf("%s\n", str);
+	free(str);
+	return 0;
+}
+```
+- 不能 ：`getmemory(str)`没能改变str的值，因为传递给子函数的只是str的复制值NULL，main函数中的str一直都是 NULL
+```c
+//修正
+//传递的是二重指针，即str的指针
+void getmemory(char **p) {
+	*p = (char *)malloc(100);
+	strcpy(*p, "hello world");
+}
+//传递的是指针别名，即str的别名，C++中
+void getmemory(char * &p) {
+	p = (char *)malloc(100);
+	strcpy(p, "hello world");
+}
+```
+## 6.运行下面的Test()函数会有什么样的后果？
+```c
+void GetMemory(char **p, int num) {
+	*p = (char *)malloc(num);
+}
+
+void Test(void) {
+	char *str = NULL;
+	GetMemory(&str, 100);
+	strcpy(str, "hello");
+	printf("%s\n", str);
+}
+```
+- 内存泄漏，没释放`free()`
+## 7.运行下面的Test()函数会有什么样的后果？
+```c
+char *GetMemory(void) {
+	char p[] = "hello world";
+	return p;
+}
+
+void Test(void) {
+	char *str = NULL;
+	str = GetMemory();
+	printf("%s\n", str);
+}
+```
+- 在`GetMemory`函数里面定义了一个局部变量，在运行结束后被释放，返回了一个野指针
+## 8.运行下面的Test()函数会有什么样的后果？
+```c
+void Test(void) {
+	char *str = (char *) malloc(100);
+	strcpy(str,"hello");
+	free(str);
+	if(str != NULL) {
+	strcpy(str, "world");
+	printf("%s\n", str);
+	}
+}
+```
+- 不能对已经释放了的指针继续操作
+- 而且没有`str = NULL`会变成野指针
+## 9.在C语言中memcpy和memmove是一样的吗？
+- memcpy()与memmove()一样都是用来拷贝src所指向内存内容前n个字节到dest所指的地址上
+- 不同的是，当src和dest所指的内存区域重叠时，memcpy可能无法正确处理，而memmove()仍然可以正确处理，不过执行效率上略慢些
+## 10.malloc的底层实现？
+1. **通过 `brk()` 系统调用**：
+    - `brk()` 用于调整进程的堆顶指针，从而扩展堆空间。
+    - 当请求的内存小于一定阈值（通常是 128KB）时，`malloc` 会通过 `brk()` 从堆中分配内存。
+    - 初始时，堆空间大小为零，`brk` 指针指向堆的起始位置。随着内存分配请求，`brk` 指针向高地址移动。
+2. **通过 `mmap()` 系统调用**：
+    - `mmap()` 用于将文件或匿名内存映射到进程的地址空间。
+    - 当请求的内存大于阈值（通常是 128KB）时，`malloc` 会通过 `mmap()` 分配内存。
+    - `mmap()` 分配的内存不会立即占用物理内存，直到首次访问时才会触发缺页异常，由操作系统分配物理页面
+## 11.在1G内存的计算机中能否malloc(1.2G)？为什么？
+因为malloc函数是在程序的虚拟地址空间申请的内存，与物理内存没有直接的关系。虚拟地址与物理地址之间的映射是由操作系统完成的，操作系统可通过虚拟内存技术扩大内存。
