@@ -1,0 +1,2 @@
+# python 输入输出
+![本地](输入输出.png images/python/python basic/输入输出.png>))
