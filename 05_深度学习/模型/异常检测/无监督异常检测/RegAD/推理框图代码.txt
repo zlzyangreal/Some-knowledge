@@ -1,0 +1,56 @@
+graph TB
+    start(开始) --> check_cuda[检查CUDA是否可用]
+    check_cuda --> set_device[设置设备]
+    set_device --> main[执行main函数]
+    
+    main --> parse_args[解析命令行参数]
+    main --> set_seed[设置随机种子]
+    main --> load_models[加载模型]
+    main --> load_datasets[加载数据集]
+    main --> load_support_set[加载支持集]
+    
+    parse_args --> define_args[定义参数]
+    define_args --> args[参数对象]
+    
+    set_seed --> seed[生成种子]
+    seed --> random_seed[设置随机种子]
+    
+    load_models --> STN[加载STN模型]
+    load_models --> ENC[加载编码器模型]
+    load_models --> PRED[加载预测器模型]
+    
+    load_datasets --> test_dataset[加载测试数据集]
+    load_datasets --> test_loader[创建测试数据加载器]
+    
+    load_support_set --> fixed_fewshot_list[加载固定支持集列表]
+    
+    main --> test[执行测试]
+    test --> STN_eval[设置STN为评估模式]
+    test --> ENC_eval[设置编码器为评估模式]
+    test --> PRED_eval[设置预测器为评估模式]
+    test --> augment_support_img[增强支持图像]
+    test --> compute_features[计算特征]
+    test --> compute_distance[计算距离矩阵]
+    test --> compute_score_map[计算得分图]
+    test --> return_results[返回结果]
+    
+    compute_features --> support_feat[计算支持集特征]
+    compute_features --> query_feat[计算查询图像特征]
+    
+    compute_distance --> mahalanobis[计算马氏距离]
+    compute_distance --> dist_list[生成距离列表]
+    
+    compute_score_map --> score_map[计算得分图]
+    compute_score_map --> gaussian_smoothing[高斯平滑]
+    
+    return_results --> scores_list[得分列表]
+    return_results --> query_imgs[查询图像]
+    return_results --> gt_list[真实标签列表]
+    return_results --> mask_list[掩码列表]
+    
+    main --> calculate_auc[计算ROC AUC]
+    calculate_auc --> img_roc_auc[图像级别ROC AUC]
+    calculate_auc --> pixel_roc_auc[像素级别ROC AUC]
+    calculate_auc --> mean_auc[平均ROC AUC]
+    
+    main --> print_results[打印结果]

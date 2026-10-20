@@ -1,0 +1,1 @@
+OpenCV是一个计算机视觉和机器学习软件库,可以运行在Linux、 Windows、 Android和Mac OS操作系统上,提供了Python、 Ruby、 MATLAB等语言的接口,实现了图像处理和计算机视觉方面的很多通用算法。
